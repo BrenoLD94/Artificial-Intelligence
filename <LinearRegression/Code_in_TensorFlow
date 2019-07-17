@@ -1,1 +1,65 @@
 
+import tensorflow as tf
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+#====================================================================================================================================#
+
+# hiperparâmetros
+learning_rate = 0.05
+epochs = 1000
+
+np.random.seed(101) 
+tf.set_random_seed(101)
+
+m = 0.8
+
+# massa de dados
+x = np.linspace(0,50,51)
+y = m*x + np.linspace(-20, 20, 51)*0.7
+
+plt.scatter(x,y)
+plt.show()
+
+# placeholders que serão alimentados durante a execução
+X = tf.placeholder("float")
+Y = tf.placeholder("float")
+
+# parâmetros
+W = tf.Variable(np.random.randn())
+b = tf.Variable(np.random.randn())
+
+# cada parâmetro representa um peso. Por exemplo, se meu input for peso e altura, então terei 2 pesos.
+
+# hipótese - (se x for um vetor pode assumir W como um escalar - use a lógica de matriz)
+y_pred = X*W + b
+
+# função de custo
+cost = tf.reduce_mean((tf.square(y_pred - Y)))/(2*len(x))
+
+#otimizador
+opt = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
+
+# inicializa as variáveis do tensorflow
+init = tf.global_variables_initializer()
+
+
+with tf.Session() as sess:
+	sess.run(init)
+	for epoch in range(0,epochs):
+		# _x ele vai pegando um valor de x por vez
+		for (_x, _y) in zip(x,y):
+			sess.run(opt, feed_dict={X: _x, Y: _y})
+
+		if(epoch % 200 == 0):
+			print("epoch = ", epoch, "cost = ", sess.run(cost, feed_dict={X:x, Y:y}), "W = ", sess.run(W), "b = ", sess.run(b)) 
+			plt.scatter(x,y)
+			plt.plot(x, x*sess.run(W) + sess.run(b), color="red")
+			plt.show()			
+
+	peso = sess.run(W)
+	bias = sess.run(b)
+
+
+predict = peso*x + bias
